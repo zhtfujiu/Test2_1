@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by 昊天 on 2016/6/5.
@@ -39,7 +38,8 @@ public class CrimeCameraFragment extends Fragment {
     private Camera.PictureCallback mJPEGCallback=new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            String fileName= UUID.randomUUID().toString()+".jpg";
+//            String fileName= UUID.randomUUID().toString()+".jpg";
+            String fileName= CurrentDateAndTime.getCurrentDateAndTime()+".jpg";
             FileOutputStream fos=null;
             boolean isSuccess=true;
             try {
@@ -79,7 +79,6 @@ public class CrimeCameraFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                getActivity().finish();
                 if (camera!=null){
                     camera.takePicture(mShutterCallback,null,mJPEGCallback);
                 }
@@ -141,10 +140,10 @@ public class CrimeCameraFragment extends Fragment {
         super.onResume();
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.GINGERBREAD){
             camera= android.hardware.Camera.open(0);
-            camera.setDisplayOrientation(90);
+//            camera.setDisplayOrientation(90);//顺时针旋转90度
         }else {
             camera= android.hardware.Camera.open();
-            camera.setDisplayOrientation(90);
+//            camera.setDisplayOrientation(90);//顺时针旋转90度
         }
     }
 

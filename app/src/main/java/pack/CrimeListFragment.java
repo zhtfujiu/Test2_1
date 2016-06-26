@@ -62,9 +62,7 @@ public class CrimeListFragment extends ListFragment {
                 intent.putExtra(CrimeFragment.EXTRA_CRIME_ID,crime.getmID());
                 startActivityForResult(intent,0);
             }
-
         });
-
     }
 
     @Override
