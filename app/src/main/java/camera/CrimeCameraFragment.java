@@ -1,6 +1,8 @@
 package camera;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,10 +27,13 @@ import java.util.List;
  * Created by 昊天 on 2016/6/5.
  */
 public class CrimeCameraFragment extends Fragment {
+
     private static final String TAG="CrimeCameraFragment";
     private Camera camera;
     private SurfaceView surfaceView;
     private View mProgressBarContainer;
+    public static final String EXTRA_PHOTO_FILENAME="camera.CrimaCameraFragment.photo_filename";
+
     private Camera.ShutterCallback mShutterCallback=new Camera.ShutterCallback() {
         @Override
         public void onShutter() {
@@ -63,7 +68,15 @@ public class CrimeCameraFragment extends Fragment {
             }
 
             if (isSuccess){
+                Intent intent=new Intent();
+                intent.putExtra(EXTRA_PHOTO_FILENAME,fileName);
+                getActivity().setResult(Activity.RESULT_OK,intent);
+                /**
+                 * 上面这行代码极有可能有问题！！！
+                 */
                 Log.i(TAG,"JPEG saved at "+fileName);
+            }else {
+                getActivity().setResult(Activity.RESULT_CANCELED);
             }
             getActivity().finish();
         }

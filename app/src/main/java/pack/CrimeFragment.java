@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +29,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import camera.CrimeCameraActivity;
+import camera.CrimeCameraFragment;
 
 /**
  * Created by 昊天 on 2016/5/18.
@@ -41,6 +43,7 @@ public class CrimeFragment extends Fragment {
     private static final String DIALOG_DATE = "date";
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_PHOTO = 1;
+    private static final String TAG="CrimeFragment";
 
     public static CrimeFragment newInstance(UUID crimeID) {
         /**
@@ -58,11 +61,21 @@ public class CrimeFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode!=Activity.RESULT_OK){
+            return;
+        }
+        //下面原来是判断的Activity.RESULT_OK
+        if (requestCode == REQUEST_DATE) {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setmDate(date);
             UpDateButtonText();
+        }else if (requestCode == REQUEST_PHOTO){
+            String filename=data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
+            if (filename!=null){
+                Log.i(TAG,"filename:"+filename);
+            }
         }
+        //下面这一段目前肯定是错误的，过一会再改
         if (requestCode == Activity.RESULT_CANCELED) {
             mCrime.setmTitle(data.getStringExtra("CHOOSE1"));
             mTitleField.setText(mCrime.getmTitle());
@@ -176,7 +189,7 @@ public class CrimeFragment extends Fragment {
                 dialogChooseFragment.show(fragmentManager, DIALOG_DATE);
             }
         });
-        //
+
         mSolvedCheckBox = (CheckBox) view.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setChecked(mCrime.ismSolved());
         mSolvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -194,7 +207,6 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), CrimeCameraActivity.class);
-//                startActivity(intent);
                 startActivityForResult(intent, REQUEST_PHOTO);
             }
         });
