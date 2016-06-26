@@ -3,6 +3,7 @@ package pack;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.test2_1.R;
 
@@ -30,6 +32,8 @@ import java.util.UUID;
 
 import camera.CrimeCameraActivity;
 import camera.CrimeCameraFragment;
+import camera.Photo;
+import camera.PictureUtils;
 
 /**
  * Created by 昊天 on 2016/5/18.
@@ -38,12 +42,13 @@ public class CrimeFragment extends Fragment {
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton, mChooseDiaBtn, mPhotoButton;
+    private ImageView mPhotoView;
     private CheckBox mSolvedCheckBox;
     public static final String EXTRA_CRIME_ID = "com.test2_1.Crime.crime_id";
     private static final String DIALOG_DATE = "date";
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_PHOTO = 1;
-    private static final String TAG="CrimeFragment";
+    private static final String TAG = "CrimeFragment";
 
     public static CrimeFragment newInstance(UUID crimeID) {
         /**
@@ -61,18 +66,22 @@ public class CrimeFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode!=Activity.RESULT_OK){
+        if (resultCode != Activity.RESULT_OK) {
             return;
         }
-        //下面原来是判断的Activity.RESULT_OK
         if (requestCode == REQUEST_DATE) {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setmDate(date);
             UpDateButtonText();
-        }else if (requestCode == REQUEST_PHOTO){
-            String filename=data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
-            if (filename!=null){
-                Log.i(TAG,"filename:"+filename);
+        } else if (requestCode == REQUEST_PHOTO) {
+            String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
+            if (filename != null) {
+                //新建一个Photo对象，并设置给当前的Crime对象
+                Photo photo=new Photo(filename);
+                mCrime.setmPhoto(photo);
+                Log.i(TAG,"This Crime:"+mCrime.getmTitle()+" has a photo"+filename);
+                //显示图片
+                showPhoto();
             }
         }
         //下面这一段目前肯定是错误的，过一会再改
@@ -198,6 +207,7 @@ public class CrimeFragment extends Fragment {
                 mCrime.setmSolved(isChecked);
             }
         });
+        mPhotoView= (ImageView) view.findViewById(R.id.fragment_crime_imageview);
         mPhotoButton = (Button) view.findViewById(R.id.fragment_crime_startcamera_button);
         if (!hasCamera()) {
             mPhotoButton.setEnabled(false);
@@ -231,5 +241,28 @@ public class CrimeFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_crime_delete, menu);
+    }
+
+    //将缩放后的图片设置给ImageView
+    private void showPhoto(){
+        Photo photo=mCrime.getmPhoto();
+        BitmapDrawable b=null;
+        if (photo!=null){
+            String path=getActivity().getFileStreamPath(photo.getmFilename()).getAbsolutePath();
+            b= PictureUtils.getScaledDrawable(getActivity(),path);
+            mPhotoView.setImageDrawable(b);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //只要CrimeFragment的视图出现在屏幕上，就调用showPhoto方法显示照片
+        showPhoto();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 }
